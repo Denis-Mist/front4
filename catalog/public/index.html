@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Каталог товаров</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      font-family: 'Montserrat', sans-serif;
+      margin: 0;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      color: #7c3aed;
+      margin-bottom: 2rem;
+      font-size: 2.5rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    #catalog {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      padding: 1rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    #catalog div {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: transform 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #catalog div:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 12px rgba(125, 58, 237, 0.2);
+    }
+
+    #catalog strong {
+      color: #7c3aed;
+      font-size: 1.2rem;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    #catalog br + span {
+      color: #94a3b8;
+      font-size: 1.1rem;
+    }
+
+    /* Стили для чата */
+    #chatContainer {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 320px;
+      max-height: 400px;
+      background: #1e293b;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid #334155;
+    }
+
+    #chatMessages {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    #chatMessages div {
+      background: #334155;
+      padding: 0.8rem;
+      border-radius: 8px;
+      max-width: 80%;
+      color: #f8fafc;
+      font-size: 0.9rem;
+    }
+
+    #chatMessages div:nth-child(even) {
+      align-self: flex-end;
+      background: #7c3aed;
+    }
+
+    #chatForm {
+      display: flex;
+      border-top: 1px solid #334155;
+    }
+
+    #chatForm input {
+      flex: 1;
+      padding: 1rem;
+      border: none;
+      background: #1e293b;
+      color: #f8fafc;
+      font-size: 0.9rem;
+    }
+
+    #chatForm input:focus {
+      outline: none;
+      background: #1e293b;
+    }
+
+    #chatForm button {
+      padding: 0 1.5rem;
+      border: none;
+      background: #7c3aed;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    #chatForm button:hover {
+      background: #6d28d9;
+    }
+
+    ::placeholder {
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <h1>Каталог товаров</h1>
+  <div id="catalog"></div>
+
+  <!-- Блок для чата -->
+  <div id="chatContainer">
+    <div id="chatMessages"></div>
+    <form id="chatForm">
+      <input type="text" id="chatInput" placeholder="Ваше сообщение..." autocomplete="off">
+      <button type="submit">Отправить</button>
+    </form>
+  </div>
+
+  <script>
+    // Пример запроса через GraphQL
+    const query = `
+      {
+        products {
+          name
+          price
+        }
+      }
+    `;
+    fetch('/graphql', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query })
+    })
+    .then(response => response.json())
+    .then(result => {
+      const catalogDiv = document.getElementById('catalog');
+      result.data.products.forEach(product => {
+        const card = document.createElement('div');
+        card.style.border = "1px solid #ccc";
+        card.style.padding = "10px";
+        card.style.margin = "10px";
+        card.innerHTML = `<strong>${product.name}</strong><br>$${product.price}`;
+        catalogDiv.appendChild(card);
+      });
+    })
+    .catch(error => console.error('Ошибка запроса GraphQL:', error));
+
+    // WebSocket чат
+    const ws = new WebSocket('ws://localhost:5000');
+    const chatMessages = document.getElementById('chatMessages');
+    const chatForm = document.getElementById('chatForm');
+    const chatInput = document.getElementById('chatInput');
+
+    ws.onopen = () => {
+      console.log('Подключено к WebSocket серверу');
+    };
+
+    ws.onmessage = (event) => {
+      const message = document.createElement('div');
+      message.textContent = event.data;
+      chatMessages.appendChild(message);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    };
+
+    chatForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const msg = chatInput.value.trim();
+      if (msg) {
+        ws.send(msg);
+        chatInput.value = '';
+      }
+    });
+  </script>
+</body>
+</html>
