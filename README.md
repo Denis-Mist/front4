@@ -10,8 +10,22 @@ Admin Server (порт 8080) Сервер предоставляет API для 
 
 Удаление товаров по ID Также сервер отдаёт простую HTML-страницу admin.html, на которой можно протестировать функциональность API через удобные формы.
 
-Структура проекта Copy online-shop/ ├── README.md # Описание проекта ├── API.md # Документация API ├── data # Данные о товарах │ └── products.json ├── catalog # Каталог товаров │ ├── package.json # Зависимости для Catalog Server │ ├── server.js # Код сервера каталога │ └── public # Статические файлы │ └── index.html # Главная страница каталога └── admin # Панель администратора ├── package.json # Зависимости для Admin Server ├── server.js # Код сервера администратора └── public # Статические файлы └── admin.html # Страница администратора Требования Для запуска проекта необходимо установить:
-
+online-shop/
+├── README.md
+├── API.md
+├── data
+│   └── products.json        // Данные о товарах
+├── catalog
+│   ├── package.json
+│   ├── server.js            // Catalog Server с GraphQL API
+│   └── public
+│       └── index.html       // Фронтенд для покупателей (каталог + чат)
+├── admin
+│   ├── package.json
+│   ├── server.js            // Admin Server с RESTful API
+│   └── public
+│       └── admin.html       // Панель администратора (управление товарами + чат)
+└── chat-server.js           // WebSocket сервер для чата (порт 5000)
 Node.js (версия 14 или выше)
 
 npm (Node Package Manager)
